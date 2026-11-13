@@ -31,6 +31,21 @@ jobs:
       - name: Prepare OpenWrt
         run: ./build.sh prepare
 
+      - name: Prepare OpenWrt Configuration
+        run: |
+          docker compose -f devenv/docker-compose.yml exec -T builder bash -lc '
+            cd /repo/openwrt
+            cp /repo/diffconfigs/uz801 .config
+            make defconfig V=sc
+          '
+
+      - name: Build Host Tools
+        run: |
+          docker compose -f devenv/docker-compose.yml exec -T builder bash -lc '
+            cd /repo/openwrt
+            make tools/install V=s
+          '
+
       - name: Build GMediaRender
         run: ./build.sh package gmediarender uz801
 
