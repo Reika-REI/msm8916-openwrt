@@ -12,7 +12,7 @@ PKG_SOURCE_VERSION:=26d8f7edf5336bc30f7334c6ad459bf7f4f90ff2
 PKG_LICENSE:=GPL-2.0
 
 PKG_FIXUP:=autoreconf
-PKG_INSTALL:=1
+PKG_INSTALL=1
 
 PKG_REMOVE_FILES:=aclocal.m4
 
@@ -22,18 +22,17 @@ include $(INCLUDE_DIR)/nls.mk
 define Package/$(PKG_NAME)
   SECTION:=multimedia
   CATEGORY:=Multimedia
-  DEPENDS:=+glib2 +libupnp +gst1-libav
+  DEPENDS:= +glib2 +libupnp +gst1-libav
   TITLE:=Headless UPnP Renderer
 endef
 
 define Package/$(PKG_NAME)/description
-  Resource efficient UPnP/DLNA renderer for embedded devices.
-  Based on the gmrender-resurrect project.
+  Resource efficient UPnP/DLNA renderer.
 endef
 
 CONFIGURE_ARGS+= \
   --with-build-cc="$(HOSTCC)" \
-  --prefix=/usr
+  --prefix="\usr"
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
@@ -50,4 +49,3 @@ define Package/$(PKG_NAME)/install
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
-
