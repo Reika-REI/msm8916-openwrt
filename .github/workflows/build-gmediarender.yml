@@ -16,13 +16,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Prepare OpenWrt build environment
-        run: ./build.sh prepare
+      - name: Cache OpenWrt Downloads and Toolchain
+        uses: actions/cache@v5
+        with:
+          path: |
+            openwrt/dl
+            openwrt/staging_dir/toolchain-aarch64_generic_gcc-14.3.0_musl
+            openwrt/staging_dir/host
+          key: gmediarender-openwrt-${{ hashFiles('version', 'openwrt/feeds.conf.default', 'diffconfigs/uz801') }}
+          restore-keys: |
+            openwrt-cache-
+            gmediarender-openwrt-
 
-      - name: Install OpenWrt host tools and toolchain
-        run: |
-          docker compose -f devenv/docker-compose.yml exec -T builder \
-            sh -lc 'cd /repo/openwrt && make tools/install toolchain/install V=s'
+      - name: Prepare OpenWrt
+        run: ./build.sh prepare
 
       - name: Build GMediaRender
         run: ./build.sh package gmediarender uz801
@@ -37,7 +44,7 @@ jobs:
             -exec cp -v {} artifacts/ \;
 
           if ! ls artifacts/*.apk >/dev/null 2>&1; then
-            echo "ERROR: GMediaRender APK was not generated"
+            echo "GMediaRender APK not found!"
             exit 1
           fi
 
@@ -49,3 +56,4 @@ jobs:
           name: gmediarender-apk
           path: artifacts/*.apk
           if-no-files-found: error
+          
