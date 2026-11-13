@@ -39,12 +39,14 @@ jobs:
             make defconfig V=sc
           '
 
-      - name: Build Host Tools
+      
+      - name: Build Host Tools and Target Toolchain
         run: |
           docker compose -f devenv/docker-compose.yml exec -T builder bash -lc '
             cd /repo/openwrt
-            make tools/install V=s
+            make tools/install toolchain/install V=s
           '
+          
 
       - name: Build GMediaRender
         run: ./build.sh package gmediarender uz801
