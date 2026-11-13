@@ -1,0 +1,47 @@
+
+name: Build GMediaRender APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Prepare OpenWrt build environment
+        run: ./build.sh prepare
+
+      - name: Build GMediaRender
+        run: ./build.sh package gmediarender uz801
+
+      - name: Collect APK
+        run: |
+          mkdir -p artifacts
+
+          find openwrt/bin/packages \
+            -type f \
+            -name 'gmediarender-*.apk' \
+            -exec cp -v {} artifacts/ \;
+
+          if ! ls artifacts/*.apk >/dev/null 2>&1; then
+            echo "ERROR: GMediaRender APK was not generated"
+            exit 1
+          fi
+
+          ls -lh artifacts/
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: gmediarender-apk
+          path: artifacts/*.apk
+          if-no-files-found: error
+          
