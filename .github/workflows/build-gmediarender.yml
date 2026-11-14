@@ -29,13 +29,30 @@ jobs:
       - name: Prepare OpenWrt
         run: ./build.sh prepare
 
+      
       - name: Prepare OpenWrt Configuration
         run: |
           docker compose -f devenv/docker-compose.yml exec -T builder bash -lc '
             cd /repo/openwrt
+
             cp /repo/diffconfigs/uz801 .config
             make defconfig V=sc
+
+            sed -i \
+              -e "s/^CONFIG_DEFAULT_kmod-gpio-button-hotplug=y/# CONFIG_DEFAULT_kmod-gpio-button-hotplug is not set/" \
+              -e "s/^CONFIG_PACKAGE_kmod-gpio-button-hotplug=y/# CONFIG_PACKAGE_kmod-gpio-button-hotplug is not set/" \
+              .config
+
+            echo "=== VERIFY CONFIGURATION ==="
+            grep -n "gpio-button-hotplug" .config || true
+
+            if grep -q "^CONFIG_PACKAGE_kmod-gpio-button-hotplug=y" .config; then
+              echo "ERROR: gpio-button-hotplug masih aktif!"
+              exit 1
+            fi
           '
+          
+     
       - name: Check Unexpected Kernel Package
         run: |
           docker compose -f devenv/docker-compose.yml exec -T builder bash -lc '
