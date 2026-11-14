@@ -67,19 +67,18 @@ jobs:
             echo "=== FINAL CONFIGURATION ==="
             grep -n "gpio-button-hotplug" .config || true
           '
-          
+
       - name: Build Linux Kernel
         run: |
           docker compose -f devenv/docker-compose.yml exec -T builder bash -lc '
             cd /repo/openwrt
             make target/linux/compile V=s
           '
-          
+
       - name: Build GMediaRender
         run: ./build.sh package gmediarender
 
-      
-       - name: Debug APK Output
+      - name: Debug APK Output
         run: |
           echo "=== ALL APK FILES ==="
           find openwrt/bin -type f -name '*.apk' -print
@@ -89,12 +88,3 @@ jobs:
 
           echo "=== PACKAGE BUILD DIRECTORY ==="
           find openwrt/bin/packages -maxdepth 5 -type d -print
-
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: gmediarender-apk
-          path: artifacts/*.apk
-          if-no-files-found: error
-          
