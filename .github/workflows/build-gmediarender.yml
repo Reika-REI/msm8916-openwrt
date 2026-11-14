@@ -67,7 +67,14 @@ jobs:
             echo "=== FINAL CONFIGURATION ==="
             grep -n "gpio-button-hotplug" .config || true
           '
-
+          
+      - name: Build Linux Kernel
+        run: |
+          docker compose -f devenv/docker-compose.yml exec -T builder bash -lc '
+            cd /repo/openwrt
+            make target/linux/compile V=s
+          '
+          
       - name: Build GMediaRender
         run: ./build.sh package gmediarender
 
