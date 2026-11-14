@@ -78,13 +78,20 @@ jobs:
       - name: Build GMediaRender
         run: ./build.sh package gmediarender
 
-      - name: Debug APK Output
+     
+      - name: Debug GMediaRender Build
         run: |
-          echo "=== ALL APK FILES ==="
-          find openwrt/bin -type f -name '*.apk' -print
-
-          echo "=== GMEDIARENDER FILES ==="
-          find openwrt -type f -iname '*gmediarender*' -print
-
           echo "=== PACKAGE BUILD DIRECTORY ==="
-          find openwrt/bin/packages -maxdepth 5 -type d -print
+          find openwrt/build_dir -iname '*gmediarender*' -print
+
+          echo "=== PACKAGE STAGING DIRECTORY ==="
+          find openwrt/staging_dir -iname '*gmediarender*' -print
+
+          echo "=== PACKAGE OUTPUT DIRECTORY ==="
+          find openwrt/bin/packages -type f -print | grep -Ei 'gmedia|gmrender' || true
+
+          echo "=== PACKAGE CONTROL FILE ==="
+          find openwrt -type f \( -name '.control' -o -name 'control' \) -print | grep -Ei 'gmedia|gmrender' || true
+
+          echo "=== PACKAGE MAKEFILE ==="
+          sed -n '1,240p' openwrt/package/msm8916/gmediarender/Makefile
