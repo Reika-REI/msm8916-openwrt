@@ -26,23 +26,37 @@ jobs:
           restore-keys: |
             openwrt-cache-
             gmediarender-openwrt-
-
       - name: Prepare OpenWrt
         run: ./build.sh prepare
 
+      - name: Prepare OpenWrt Configuration
+        run: |
+          docker compose -f devenv/docker-compose.yml exec -T builder bash -lc '
+            cd /repo/openwrt
+            cp /repo/diffconfigs/uz801 .config
+            make defconfig V=sc
+          '
+      - name: Check Unexpected Kernel Package
+        run: |
+          docker compose -f devenv/docker-compose.yml exec -T builder bash -lc '
+            cd /repo/openwrt
+            echo "=== GPIO BUTTON HOTPLUG ==="
+            grep -n "gpio-button-hotplug" .config || true
+            echo "=== KERNEL CONFIG ==="
+            ls -lah build_dir/target-aarch64_generic_musl/linux-msm89xx_msm8916/ || true
+            echo "=== PACKAGE SELECTION ==="
+            grep -n "CONFIG_PACKAGE_kmod-gpio-button-hotplug" .config || true
+          '
+      
       - name: Build Host Tools and Target Toolchain
         run: |
           docker compose -f devenv/docker-compose.yml exec -T builder bash -lc '
             cd /repo/openwrt
             make tools/install toolchain/install V=s
           '
-
-      - name: Build Kernel
-        run: ./build.sh kernel uz801
-
+          
       - name: Build GMediaRender
         run: ./build.sh package gmediarender uz801
-
       - name: Collect APK
         run: |
           mkdir -p artifacts
