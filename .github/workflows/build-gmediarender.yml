@@ -78,21 +78,31 @@ jobs:
       - name: Build GMediaRender
         run: ./build.sh package gmediarender
 
+      
       - name: Collect APK
+        shell: bash
         run: |
           mkdir -p artifacts
 
+          echo "=== Searching GMediaRender APK ==="
+
           find openwrt/bin/packages \
             -type f \
-            -name 'gmediarender-*.apk' \
+            -iname '*gmediarender*.apk' \
+            -print \
             -exec cp -v {} artifacts/ \;
 
-          if ! ls artifacts/*.apk >/dev/null 2>&1; then
+          echo "=== Collected APK ==="
+
+          if ! compgen -G "artifacts/*.apk" > /dev/null; then
             echo "GMediaRender APK not found!"
+            echo "=== Available APK files ==="
+            find openwrt/bin/packages -type f -name '*.apk'
             exit 1
           fi
 
           ls -lh artifacts/
+
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
