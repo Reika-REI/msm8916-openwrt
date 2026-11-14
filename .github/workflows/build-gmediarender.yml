@@ -38,7 +38,17 @@ jobs:
             cp /repo/diffconfigs/uz801 .config
             make defconfig V=sc
           '
-
+      - name: Check Unexpected Kernel Package
+        run: |
+          docker compose -f devenv/docker-compose.yml exec -T builder bash -lc '
+            cd /repo/openwrt
+            echo "=== GPIO BUTTON HOTPLUG ==="
+            grep -n "gpio-button-hotplug" .config || true
+            echo "=== KERNEL CONFIG ==="
+            ls -lah build_dir/target-aarch64_generic_musl/linux-msm89xx_msm8916/ || true
+            echo "=== PACKAGE SELECTION ==="
+            grep -n "CONFIG_PACKAGE_kmod-gpio-button-hotplug" .config || true
+          '
       
       - name: Build Host Tools and Target Toolchain
         run: |
